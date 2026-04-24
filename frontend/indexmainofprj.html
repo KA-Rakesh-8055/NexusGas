@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusGas | Neural Energy Protocol</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --accent-cyan: #00F2FF;
+            --accent-purple: #A855F7;
+            --text-white: #FFFFFF;
+            --text-muted: #94A3B8;
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .neural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+            z-index: -1;
+        }
+
+        .neural-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 5%;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-dark), transparent);
+            transition: opacity 0.3s;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--text-white);
+        }
+
+        .nav-btn-signup {
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            color: var(--bg-dark);
+            padding: 0.6rem 1.5rem;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.3s var(--ease);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .nav-btn-signup:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+        }
+
+        .nav-btn-login {
+            border: 1px solid var(--accent-purple);
+            color: var(--text-white);
+            padding: 0.6rem 1.5rem;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s var(--ease);
+            cursor: pointer;
+        }
+
+        .nav-btn-login:hover {
+            background: rgba(168, 85, 247, 0.1);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+        }
+
+        .btn-dashboard {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #fff;
+            padding: 0.75rem 2rem;
+            border-radius: 99px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 10px 25px rgba(0, 242, 255, 0.2);
+            transition: all 0.4s var(--ease);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-dashboard:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 242, 255, 0.4);
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+
+        .dash-section {
+            display: none;
+            animation: revealUp 0.5s var(--ease);
+        }
+
+        .dash-section.active {
+            display: block;
+        }
+
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            align-items: center;
+            padding: 4rem 8%;
+            gap: 4rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            color: var(--accent-cyan);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        .hero-title span {
+            display: block;
+            background: linear-gradient(90deg, #FFFFFF, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 500px;
+            margin-bottom: 3rem;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            color: #fff;
+            padding: 1.1rem 2.8rem;
+            border-radius: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.4s var(--ease);
+            box-shadow: 0 15px 40px rgba(0, 242, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(0, 242, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-white);
+            padding: 1.1rem 2.8rem;
+            border-radius: 16px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.4s var(--ease);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .visual-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wireframe-sphere {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            opacity: 0.3;
+            animation: spin 30s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .telemetry-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .telemetry-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .pulse-icon {
+            color: var(--accent-cyan);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-group {
+            margin-bottom: 2rem;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-value {
+            color: var(--text-white);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            width: 75.4%;
+            border-radius: 4px;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .mini-stat {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .mini-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-stat-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .glow-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+            filter: blur(40px);
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            min-height: calc(100vh - 100px);
+            padding: 2rem 8%;
+            align-items: center;
+            gap: 6rem;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            padding: 3.5rem;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .login-card .logo-icon {
+            margin: 0 auto 2.5rem;
+            width: 64px;
+            height: 64px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .login-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-label span.action {
+            color: var(--accent-cyan);
+            cursor: pointer;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.25rem;
+            border-radius: 16px;
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.02);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        .btn-connect {
+            width: 100%;
+            background: var(--accent-cyan);
+            color: #000;
+            padding: 1.25rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-connect:hover {
+            box-shadow: 0 0 45px rgba(0, 242, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .login-footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .login-footer span {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .security-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .login-info h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .login-info h1 span {
+            display: block;
+            color: var(--accent-cyan);
+        }
+
+        .login-info p {
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto 4rem;
+            line-height: 1.6;
+        }
+
+        .info-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .info-stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            width: 160px;
+        }
+
+        .info-stat-card h3 {
+            font-size: 1.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-stat-card span {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1024px) {
+
+            .hero,
+            .login-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+                padding-top: 2rem;
+            }
+
+            .hero-desc,
+            .login-info p {
+                margin: 0 auto 3rem;
+            }
+
+            .hero-btns,
+            .info-stats {
+                justify-content: center;
+            }
+
+            .wireframe-sphere {
+                display: none;
+            }
+        }
+
+        /* Dashboard Specific Layout */
+        .dash-container {
+            display: flex;
+            height: 100vh;
+            margin-top: -100px;
+            /* Offset page padding */
+            background: rgba(2, 6, 23, 0.5);
+            position: fixed;
+            top: 100px;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+        }
+
+        .dash-sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid var(--glass-border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        .user-profile-card {
+            text-align: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .avatar-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .user-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Dashboard Component Styles (Dark Neural Edition) */
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 12;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 286;
+            filter: drop-shadow(0 0 8px var(--accent-cyan));
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .stat-row-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chart-container {
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            height: 100%;
+        }
+
+        /* Scanner Modal Styles */
+        .scanner-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s var(--ease);
+        }
+
+        .scanner-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .scanner-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.4s var(--ease);
+        }
+
+        .scanner-modal.active .scanner-content {
+            transform: scale(1);
+        }
+
+        .scanner-img-frame {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 2rem;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+
+        .scanner-img-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--accent-cyan);
+            animation: scanMove 3s infinite linear;
+        }
+
+        @keyframes scanMove {
+            0% {
+                top: 0;
+            }
+
+            50% {
+                top: 100%;
+            }
+
+            100% {
+                top: 0;
+            }
+        }
+
+        .autopay-badge {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .status-badge-cyan {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .dash-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .dash-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s var(--ease);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .dash-nav-item:hover,
+        .dash-nav-item.active {
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--accent-cyan);
+        }
+
+        .dash-nav-item i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .dash-main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.03), transparent);
+        }
+
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            background: var(--glass-bg);
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 400px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            width: 100%;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .action-node {
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .action-node:hover {
+            color: var(--accent-cyan);
+        }
+
+        .avatar-mini {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: absolute;
+            top: 70px;
+            right: 2rem;
+            width: 280px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+        }
+
+        .dropdown-header {
+            background: #0284c7;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #fff;
+        }
+
+        .dropdown-avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .dropdown-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .dropdown-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #475569;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-footer {
+            background: #f1f5f9;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .sign-out-btn {
+            color: #6366f1;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Account Page Specifics */
+        .account-card {
+            background: #fff;
+            color: #334155;
+            border-radius: 8px;
+            padding: 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 1rem;
+        }
+
+        .account-title {
+            color: #0284c7;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .account-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .acc-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .acc-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .acc-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #334155;
+            background: #fff;
+        }
+
+        .acc-input:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        .acc-avatar-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2rem;
+        }
+
+        .acc-avatar-big {
+            width: 150px;
+            height: 150px;
+            background: #f97316;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .btn-update {
+            background: #f97316;
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        /* Profile Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-modal {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Team & About Sections */
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 0 5%;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 0 8% 8rem;
+        }
+
+        .founder-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--accent-cyan);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .founder-card::before {
+            content: 'FOUNDER';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .team-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s var(--ease);
+        }
+
+        .team-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-5px);
+            background: rgba(168, 85, 247, 0.05);
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--glass-border);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .footer {
+            border-top: 1px solid var(--glass-border);
+            padding: 4rem 8% 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            background: rgba(2, 6, 23, 0.8);
+        }
+
+        .footer-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-links h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 1.5rem;
+            color: var(--text-white);
+        }
+
+        .footer-links a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 4rem 8% 8rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .feature-card i {
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="neural-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="mainNav">
+        <div class="logo">
+            <div class="logo-icon"><i data-lucide="flame"></i></div>
+            NexusGas
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a onclick="showPage('register')" class="nav-btn-signup" id="signupNavLink">Signup</a>
+            <a onclick="showPage('login')" class="nav-btn-login" id="loginNavLink">Login</a>
+            <a onclick="logout()" class="nav-link" id="logoutNavLink" style="display: none;">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <div class="hero-content">
+                <div class="hero-badge"><i data-lucide="activity"></i> Neural Network V4.2</div>
+                <h1 class="hero-title">The Future of <span>Smart Energy</span></h1>
+                <p class="hero-desc">Experience the next generation of gas management. Real-time neural tracking,
+                    automated booking, and quantum-safe payments.</p>
+                <div class="hero-btns">
+                    <!-- Dashboard entry points removed per protocol -->
+                </div>
+            </div>
+            <div class="visual-container">
+                <svg class="wireframe-sphere" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="sphereGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:var(--accent-cyan);stop-opacity:0.2" />
+                            <stop offset="100%" style="stop-color:var(--accent-purple);stop-opacity:0.2" />
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" stroke="url(#sphereGradient)" stroke-width="0.5">
+                        <circle cx="100" cy="100" r="80" />
+                        <ellipse cx="100" cy="100" rx="80" ry="30" />
+                        <ellipse cx="100" cy="100" rx="30" ry="80" />
+                        <ellipse cx="100" cy="100" rx="80" ry="30" transform="rotate(45 100 100)" />
+                        <ellipse cx="100" cy="100" rx="30" ry="80" transform="rotate(45 100 100)" />
+                        <ellipse cx="100" cy="100" rx="80" ry="30" transform="rotate(-45 100 100)" />
+                        <ellipse cx="100" cy="100" rx="30" ry="80" transform="rotate(-45 100 100)" />
+                    </g>
+                </svg>
+                <div class="telemetry-box">
+                    <div class="telemetry-header">
+                        <i data-lucide="users"></i>
+                        Social Trust Protocol
+                    </div>
+                    <div style="margin: 1.5rem 0;">
+                        <div
+                            style="font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); line-height: 1.2;">
+                            15,000+ Happy Customers</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.5;">
+                            Join thousands of entities worldwide who trust NexusGas for autonomous energy management.
+                        </p>
+                    </div>
+                    <div class="mini-stats">
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Network Trust</div>
+                            <div class="mini-stat-val">99.9%</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Global Rating</div>
+                            <div class="mini-stat-val">4.9 / 5</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: -10px; margin-top: 1.5rem; align-items: center;">
+                        <div
+                            style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; border: 2px solid var(--bg-dark); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;">
+                            JD</div>
+                        <div
+                            style="width: 32px; height: 32px; border-radius: 50%; background: #8b5cf6; border: 2px solid var(--bg-dark); margin-left: -12px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;">
+                            AM</div>
+                        <div
+                            style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; border: 2px solid var(--bg-dark); margin-left: -12px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;">
+                            RS</div>
+                        <span
+                            style="margin-left: 10px; font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600;">+12k
+                            active nodes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <section class="section-header">
+            <div class="hero-badge" style="margin: 0 auto 1.5rem;"><i data-lucide="info"></i> Project Intelligence</div>
+            <h2 class="section-title">The NexusGas <span>Ecosystem</span></h2>
+            <p class="hero-desc" style="margin: 0 auto; max-width: 700px;">NexusGas is a decentralized energy monitoring
+                protocol designed to bridge the gap between traditional utility management and modern IoT autonomy.</p>
+        </section>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i data-lucide="cpu"></i>
+                <h3>Neural Core</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">Automated decision-making
+                    algorithms that predict gas exhaustion before it happens.</p>
+            </div>
+            <div class="feature-card">
+                <i data-lucide="layers"></i>
+                <h3>Decentralized Grid</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">A distributed network of IoT
+                    sensors providing real-time data transparency across the globe.</p>
+            </div>
+            <div class="feature-card">
+                <i data-lucide="shield-check"></i>
+                <h3>Quantum Safety</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">End-to-end encrypted telemetry
+                    ensuring your energy data remains private and secure.</p>
+            </div>
+        </div>
+
+        <!-- Architects Section -->
+        <section class="section-header">
+            <div class="hero-badge" style="margin: 0 auto 1.5rem;"><i data-lucide="users"></i> Neural Architects</div>
+            <h2 class="section-title">The Team Behind <span>The Vision</span></h2>
+        </section>
+
+        <div class="team-grid">
+            <!-- Founder -->
+            <div class="founder-card">
+                <div class="team-avatar"
+                    style="width: 120px; height: 120px; font-size: 2.5rem; background: var(--accent-cyan); color: var(--bg-dark);">
+                    RK</div>
+                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 2rem; margin-bottom: 0.5rem;">RAKESH K
+                </h2>
+                <p style="color: var(--accent-cyan); font-weight: 700; letter-spacing: 1px;">VISIONARY & FOUNDER</p>
+                <p style="color: var(--text-muted); max-width: 600px; margin: 1.5rem auto 0; line-height: 1.6;">
+                    "Building the future of energy management through decentralized neural links and autonomous IoT
+                    synchronization."</p>
+            </div>
+
+            <!-- Creators -->
+            <div class="team-card">
+                <div class="team-avatar">P</div>
+                <h3>PRATIT</h3>
+                <p style="color: var(--accent-purple); font-size: 0.8rem; font-weight: 700;">CORE ARCHITECT</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">S</div>
+                <h3>SANGRAM RANA</h3>
+                <p style="color: var(--accent-purple); font-size: 0.8rem; font-weight: 700;">SYSTEM ENGINEER</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">K</div>
+                <h3>KESAVA</h3>
+                <p style="color: var(--accent-purple); font-size: 0.8rem; font-weight: 700;">UI PROTOCOL LEAD</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">R</div>
+                <h3>RAJESH</h3>
+                <p style="color: var(--accent-purple); font-size: 0.8rem; font-weight: 700;">NETWORK SECURITY</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-info">
+                <div class="footer-logo">
+                    <div class="logo-icon" style="width: 32px; height: 32px;"><i data-lucide="flame"
+                            style="width: 16px;"></i></div>
+                    NexusGas
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; max-width: 300px;">The next
+                    generation of autonomous energy management and neural monitoring protocols.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Ecosystem</h4>
+                <a href="#">Neural Link</a>
+                <a href="#">IoT Grid</a>
+                <a href="#">Security Atlas</a>
+            </div>
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <a href="#">Privacy Protocol</a>
+                <a href="#">Terms of Uplink</a>
+                <a href="#">Safety Standards</a>
+            </div>
+        </footer>
+        <div
+            style="background: #020617; padding: 2rem 8%; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+            &copy; 2026 NexusGas Neural Network. Developed by the Grid Architects.
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login" class="page">
+        <div class="login-container">
+            <form onsubmit="event.preventDefault(); handleLogin();" class="login-card">
+                <div class="logo-icon"><i data-lucide="flame"></i></div>
+                <div class="login-header">
+                    <h2>Access Uplink</h2>
+                    <p>Verify your neural signature to continue.</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entity Identifier</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="user@neural.link" required
+                        autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        Pass-Key
+                        <span class="action">Recover</span>
+                    </label>
+                    <input type="password" id="loginPass" class="form-input" placeholder="••••••••" required
+                        autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-connect">
+                    Establish Connection
+                    <i data-lucide="arrow-right"></i>
+                </button>
+                <div class="login-footer">New Entity? <span onclick="showPage('register')">Register Protocol</span>
+                </div>
+                <div class="security-badge"><i data-lucide="shield-check" style="width:14px"></i> AES-256 QUANTUM SECURE
+                    CONNECTION</div>
+            </form>
+            <div class="login-info">
+                <div class="logo-icon"
+                    style="margin: 0 auto 2rem; width: 80px; height: 80px; background: rgba(0,242,255,0.05);"><i
+                        data-lucide="zap" style="width: 32px; height: 32px;"></i></div>
+                <h1>High-Velocity <span>Gas Management</span></h1>
+                <p>Experience the apex of domestic energy logistics through neural automation.</p>
+                <div class="info-stats">
+                    <div class="info-stat-card">
+                        <h3>99.9%</h3><span>Up-time</span>
+                    </div>
+                    <div class="info-stat-card">
+                        <h3>12ms</h3><span>Latency</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="register" class="page">
+        <div class="login-container">
+            <form onsubmit="event.preventDefault(); handleRegister();" class="login-card">
+                <div class="logo-icon"
+                    style="background: rgba(168, 85, 247, 0.1); color: var(--accent-purple); border-color: rgba(168, 85, 247, 0.2);">
+                    <i data-lucide="user-plus"></i></div>
+                <div class="login-header">
+                    <h2>Create Entity</h2>
+                    <p>Initialize your presence in the neural grid.</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entity Name</label>
+                    <input type="text" id="regName" class="form-input" placeholder="John Doe" required
+                        autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Universal Identifier</label>
+                    <input type="email" id="regEmail" class="form-input" placeholder="user@neural.link" required
+                        autocomplete="username">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Pass-Key</label>
+                        <input type="password" id="regPass" class="form-input" placeholder="••••••••" required
+                            autocomplete="new-password">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Verify Key</label>
+                        <input type="password" id="regConfirm" class="form-input" placeholder="••••••••" required
+                            autocomplete="new-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn-connect"
+                    style="background: linear-gradient(90deg, #8B5CF6, #7C3AED); color: #fff; box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);">
+                    Initialize Account
+                    <i data-lucide="arrow-right"></i>
+                </button>
+                <div class="login-footer">Existing Entity? <span style="color: var(--accent-purple)"
+                        onclick="showPage('login')">Access Uplink</span></div>
+            </form>
+            <div class="login-info">
+                <div class="logo-icon"
+                    style="margin: 0 auto 2.5rem; width: 80px; height: 80px; background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.1);">
+                    <i data-lucide="flame" style="width: 32px; height: 32px; color: var(--accent-purple);"></i></div>
+                <h1 class="hero-title" style="text-align: center; font-size: 3.5rem;">The Future of <span
+                        style="background: linear-gradient(90deg, #A855F7, #6366F1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Smart
+                        Energy</span></h1>
+                <p
+                    style="text-align: center; color: var(--text-muted); max-width: 400px; margin: 0 auto 4rem; line-height: 1.6;">
+                    Join the most advanced autonomous gas booking network on the planet.</p>
+                <div class="telemetry-card"
+                    style="width: 100%; max-width: 400px; margin: 0 auto; padding: 1.5rem; background: rgba(255,255,255,0.02);">
+                    <div style="display: flex; align-items: center; gap: 1.5rem;">
+                        <div
+                            style="width: 48px; height: 48px; background: rgba(168, 85, 247, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--accent-purple);">
+                            <i data-lucide="shield-check"></i></div>
+                        <div>
+                            <div
+                                style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">
+                                Quantum Safe</div>
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                                End-to-End Encryption</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="page">
+        <div class="dash-container">
+            <!-- Sidebar -->
+            <aside class="dash-sidebar">
+                <div class="user-profile-card">
+                    <div class="avatar-large" id="dashAvatarLarge">RK</div>
+                    <div class="user-name" id="dashUserName">Rakesh K</div>
+                    <div class="user-role">Entity Node Agent</div>
+                </div>
+
+                <nav class="dash-nav" id="sidebarNav">
+                    <a class="dash-nav-item active" onclick="showDashSection('overview')"><i
+                            data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a class="dash-nav-item" onclick="showDashSection('orders')"><i data-lucide="shopping-bag"></i>
+                        Order History</a>
+                    <a class="dash-nav-item" onclick="showDashSection('payments')"><i data-lucide="credit-card"></i>
+                        Payment Nodes</a>
+                    <a class="dash-nav-item" onclick="showDashSection('bills')"><i data-lucide="file-text"></i> Bills &
+                        Dues</a>
+                    <a class="dash-nav-item" onclick="showDashSection('membership')"><i data-lucide="award"></i> Grid
+                        Access</a>
+                    <a class="dash-nav-item" onclick="showPage('profile')"><i data-lucide="user"></i> My Profile</a>
+                </nav>
+
+                <button class="btn-secondary" style="margin-top: auto; padding: 0.75rem;" onclick="logout()">
+                    <i data-lucide="log-out" style="width:14px; margin-right:8px;"></i> Logout
+                </button>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="dash-main">
+                <header class="dash-header">
+                    <div class="search-bar">
+                        <i data-lucide="search" style="width:18px; color: var(--text-muted);"></i>
+                        <input type="text" placeholder="Search for Protocols and Telemetry...">
+                    </div>
+                    <div class="header-actions">
+                        <i data-lucide="help-circle" class="action-node"></i>
+                        <i data-lucide="bell" class="action-node"></i>
+                        <div class="avatar-mini" id="dashAvatarMini" style="cursor: pointer;"
+                            onclick="toggleProfileDropdown()">RK</div>
+
+                        <!-- Dropdown -->
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar" id="dropAvatar">RK</div>
+                                <div class="dropdown-name" id="dropName">Rakesh K</div>
+                            </div>
+                            <div class="dropdown-item" onclick="showPage('profile')">
+                                <i data-lucide="user-square"></i>
+                                My Profile
+                            </div>
+                            <div class="dropdown-footer">
+                                <div class="sign-out-btn" onclick="logout()">Sign Out</div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Overview Section -->
+                <div id="section-overview" class="dash-section active">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                        <div>
+                            <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 0.25rem;">Dashboard</h1>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div id="nodeStatusDot" style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444;"></div>
+                                <p style="color: var(--text-muted); font-size: 0.85rem;">Grid Node: <span id="connectedNodeIP">Disconnected</span></p>
+                                <button class="btn-secondary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="connectToESP32()">Link Node</button>
+                            </div>
+                        </div>
+                        <div id="systemStatusBadge" class="status-badge-cyan" style="opacity: 0.5;">
+                            <i data-lucide="cloud-off" style="width:16px;"></i>
+                            System Offline
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem;">
+                        <!-- Gauge Card -->
+                        <div class="telemetry-card"
+                            style="padding: 2.5rem; text-align: center; background: var(--glass-bg); border: 1px solid var(--glass-border);">
+                            <div
+                                style="font-weight: 600; color: var(--text-muted); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">
+                                Current Gas Level</div>
+                            <div class="gauge-container">
+                                <svg class="gauge-svg" width="200" height="200">
+                                    <circle class="gauge-bg" cx="100" cy="100" r="70" />
+                                    <circle class="gauge-fill" cx="100" cy="100" r="70" />
+                                </svg>
+                                <div class="gauge-text">
+                                    <div id="liveGasValue" style="font-size: 2.5rem; font-weight: 800; color: var(--accent-cyan);">0%</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Remaining</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats & Chart Group -->
+                        <div style="display: grid; grid-template-rows: auto 1fr; gap: 2rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div class="stat-row-item">
+                                    <div class="stat-icon-box" style="background: rgba(6,182,212,0.1); color: #06b6d4;">
+                                        <i data-lucide="droplets" style="width:20px;"></i></div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Daily Average</div>
+                                        <div id="liveDailyAvg" style="font-weight: 700; font-size: 1.1rem; color: #fff;">0.0 kg</div>
+                                    </div>
+                                </div>
+                                <div class="stat-row-item">
+                                    <div class="stat-icon-box"
+                                        style="background: rgba(168,85,247,0.1); color: #a855f7;"><i
+                                            data-lucide="zap" style="width:20px;"></i></div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Node Voltage</div>
+                                        <div id="liveVoltage" style="font-weight: 700; font-size: 1.1rem; color: #fff;">0.0 V</div>
+                                    </div>
+                                </div>
+                                <div class="stat-row-item">
+                                    <div class="stat-icon-box"
+                                        style="background: rgba(249,115,22,0.1); color: #f97314;"><i
+                                            data-lucide="cpu" style="width:20px;"></i></div>
+                                    <div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Grid Load</div>
+                                        <div id="liveLoad" style="font-weight: 700; font-size: 1.1rem; color: #fff;">0.0 kW</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container">
+                                <div
+                                    style="font-weight: 600; color: var(--text-muted); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem;">
+                                    Weekly Usage Trend</div>
+                                <svg width="100%" height="150" viewBox="0 0 400 150" preserveAspectRatio="none">
+                                    <defs>
+                                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="var(--accent-cyan)" stop-opacity="0.2" />
+                                            <stop offset="100%" stop-color="var(--accent-cyan)" stop-opacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path
+                                        d="M0,100 C50,80 80,120 120,90 C160,60 200,110 240,70 C280,30 320,100 360,50 L400,80 L400,150 L0,150 Z"
+                                        fill="url(#chartGrad)" />
+                                    <path
+                                        d="M0,100 C50,80 80,120 120,90 C160,60 200,110 240,70 C280,30 320,100 360,50 L400,80"
+                                        fill="none" stroke="var(--accent-cyan)" stroke-width="3"
+                                        stroke-linecap="round" />
+                                </svg>
+                                <div
+                                    style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+                                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order History Section -->
+                <div id="section-orders" class="dash-section">
+                    <h1 class="hero-title" style="font-size: 2.5rem;">Order <span>History</span></h1>
+                    <div class="telemetry-card" style="margin-top: 2rem; width: 100%;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 1rem;">Protocol ID</th>
+                                    <th style="padding: 1rem;">Service Type</th>
+                                    <th style="padding: 1rem;">Status</th>
+                                    <th style="padding: 1rem;">Quantum Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 1rem; color: var(--accent-cyan);">#NX-8829</td>
+                                    <td style="padding: 1rem;">Smart Gas Refill</td>
+                                    <td style="padding: 1rem;"><span
+                                            style="color: #10b981; font-size: 0.8rem; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px;">Delivered</span>
+                                    </td>
+                                    <td style="padding: 1rem;">₹850.00</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 1rem; color: var(--accent-cyan);">#NX-7741</td>
+                                    <td style="padding: 1rem;">Node Maintenance</td>
+                                    <td style="padding: 1rem;"><span
+                                            style="color: #f59e0b; font-size: 0.8rem; background: rgba(245,158,11,0.1); padding: 2px 8px; border-radius: 4px;">Pending</span>
+                                    </td>
+                                    <td style="padding: 1rem;">₹299.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payment Details Section -->
+                <div id="section-payments" class="dash-section">
+                    <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 2rem;">Payment <span>Nodes</span>
+                    </h1>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+                        <!-- Card Management Node -->
+                        <div class="telemetry-card"
+                            style="padding: 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                                <div style="font-weight: 700; color: #fff;">Credit / Debit Cards</div>
+                                <i data-lucide="credit-card" style="color: var(--accent-cyan);"></i>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+                                    height="20" alt="Visa">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                                    height="20" alt="Mastercard">
+                            </div>
+                            <form style="display: flex; flex-direction: column; gap: 1rem;">
+                                <div class="field">
+                                    <label style="font-size: 0.75rem; color: var(--text-muted);">Card Number</label>
+                                    <input type="text" class="acc-input" placeholder="XXXX XXXX XXXX 4800"
+                                        style="background: rgba(0,0,0,0.2);">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="field">
+                                        <label style="font-size: 0.75rem; color: var(--text-muted);">Expiry</label>
+                                        <input type="text" class="acc-input" placeholder="MM/YY"
+                                            style="background: rgba(0,0,0,0.2);">
+                                    </div>
+                                    <div class="field">
+                                        <label style="font-size: 0.75rem; color: var(--text-muted);">CVV</label>
+                                        <input type="password" class="acc-input" placeholder="***"
+                                            style="background: rgba(0,0,0,0.2);">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-primary"
+                                    style="padding: 0.75rem; font-size: 0.85rem;">Update Card Node</button>
+                            </form>
+                        </div>
+
+                        <!-- UPI Nodes -->
+                        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                            <!-- PhonePe -->
+                            <div class="telemetry-card" onclick="openUPIModal('PhonePe')"
+                                style="padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; background: var(--glass-bg); cursor: pointer; transition: transform 0.3s var(--ease);">
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg"
+                                        height="30" alt="PhonePe">
+                                    <div>
+                                        <div style="font-weight: 600; color: #fff;">PhonePe</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Linked: 821****362
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--accent-cyan);">Link Autopay</span>
+                            </div>
+
+                            <!-- Google Pay -->
+                            <div class="telemetry-card" onclick="openUPIModal('Google Pay')"
+                                style="padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; background: var(--glass-bg); cursor: pointer; transition: transform 0.3s var(--ease);">
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg"
+                                        height="25" alt="GPay">
+                                    <div>
+                                        <div style="font-weight: 600; color: #fff;">Google Pay</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Neural Link Ready
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--accent-cyan);">Link Autopay</span>
+                            </div>
+
+                            <!-- Paytm -->
+                            <div class="telemetry-card" onclick="openUPIModal('Paytm')"
+                                style="padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; background: var(--glass-bg); cursor: pointer; transition: transform 0.3s var(--ease);">
+                                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg"
+                                        height="20" alt="Paytm">
+                                    <div>
+                                        <div style="font-weight: 600; color: #fff;">Paytm Wallet</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">Available: ₹444.28
+                                        </div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--accent-cyan);">Link Autopay</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bills Section -->
+                <div id="section-bills" class="dash-section">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h1 class="hero-title" style="font-size: 2.5rem;">Bills & <span>Dues</span></h1>
+                        <div class="status-badge-cyan"
+                            style="border-color: var(--accent-cyan); background: rgba(0,242,255,0.05);">
+                            <i data-lucide="zap" style="width:14px; margin-right:5px;"></i> Neural Autopay Active
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 2rem;">
+                        <!-- Outstanding Card -->
+                        <div class="telemetry-card"
+                            style="padding: 2rem; background: linear-gradient(135deg, rgba(0,242,255,0.05), transparent);">
+                            <div
+                                style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 1px;">
+                                TOTAL OUTSTANDING</div>
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">
+                                ₹1,240.45</div>
+                            <div
+                                style="display: flex; align-items: center; gap: 8px; color: var(--accent-cyan); font-size: 0.85rem;">
+                                <i data-lucide="info" style="width:14px;"></i>
+                                Auto-sync scheduled for Feb 28
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="telemetry-card" style="padding: 0; overflow: hidden;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead style="background: rgba(255,255,255,0.02);">
+                                    <tr
+                                        style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                                        <th style="padding: 1rem;">Invoice</th>
+                                        <th style="padding: 1rem;">Status</th>
+                                        <th style="padding: 1rem;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <td style="padding: 1.25rem;">#INV-9902</td>
+                                        <td style="padding: 1.25rem;">
+                                            <span
+                                                style="color: var(--accent-cyan); font-size: 0.75rem; background: rgba(0,242,255,0.1); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+                                                <i data-lucide="refresh-cw" style="width: 12px;"></i> Autopay Scheduled
+                                            </span>
+                                        </td>
+                                        <td style="padding: 1.25rem; font-weight: 700;">₹850.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1.25rem;">#INV-8841</td>
+                                        <td style="padding: 1.25rem;">
+                                            <span
+                                                style="color: var(--accent-cyan); font-size: 0.75rem; background: rgba(0,242,255,0.1); padding: 4px 12px; border-radius: 100px; display: inline-flex; align-items: center; gap: 6px;">
+                                                <i data-lucide="refresh-cw" style="width: 12px;"></i> Autopay Scheduled
+                                            </span>
+                                        </td>
+                                        <td style="padding: 1.25rem; font-weight: 700;">₹390.45</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Membership Section -->
+                <div id="section-membership" class="dash-section">
+                    <h1 class="hero-title" style="font-size: 2.5rem;">Grid <span>Access</span></h1>
+                    <div class="telemetry-card"
+                        style="margin-top: 2rem; width: 100%; border: 1px solid var(--accent-cyan);">
+                        <div style="display: flex; gap: 2rem; align-items: center;">
+                            <div
+                                style="width: 80px; height: 80px; border-radius: 50%; background: rgba(0,242,255,0.1); display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="shield-check"
+                                    style="width: 40px; height: 40px; color: var(--accent-cyan);"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;">Neural Premium Plan</h3>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">Status: <span
+                                        style="color: var(--accent-cyan);">ACTIVE</span> • Priority Grid Access Enabled
+                                </p>
+                            </div>
+                            <button class="btn-secondary" style="margin-left: auto;">Manage Subscription</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- My Account Page -->
+    <div id="profile" class="page">
+        <div class="dash-container">
+            <!-- Reuse Sidebar -->
+            <aside class="dash-sidebar">
+                <div class="user-profile-card">
+                    <div class="avatar-large" id="accAvatarSidebar">RK</div>
+                    <div class="user-name" id="accNameSidebar">Rakesh K</div>
+                    <div class="user-role">Entity Node Agent</div>
+                </div>
+                <nav class="dash-nav">
+                    <a class="dash-nav-item"
+                        onclick="showPage('dashboard'); setTimeout(() => showDashSection('overview'), 50);"><i
+                            data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a class="dash-nav-item active"><i data-lucide="user"></i> Identity Protocol</a>
+                    <a class="dash-nav-item" onclick="logout()"><i data-lucide="log-out"></i> Terminate Session</a>
+                </nav>
+            </aside>
+
+            <main class="dash-main">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+                    <div>
+                        <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 0.5rem;">Identity
+                            <span>Protocol</span></h1>
+                        <p style="color: var(--text-muted);">Manage your universal entity credentials.</p>
+                    </div>
+                    <div class="status-badge-cyan" style="padding: 1rem 1.5rem; border-radius: 16px;">
+                        <div
+                            style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+                            Trust Integrity</div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-cyan);">98.4%</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+                    <!-- Identity Node -->
+                    <div class="telemetry-card" style="text-align: center; padding: 3rem 2rem;">
+                        <div style="position: relative; width: 120px; height: 120px; margin: 0 auto 2rem;">
+                            <div
+                                style="position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px; border: 2px solid var(--accent-cyan); border-radius: 50%; border-top-color: transparent; animation: spin 4s linear infinite;">
+                            </div>
+                            <div class="acc-avatar-big" id="accAvatarBig"
+                                style="width: 100%; height: 100%; font-size: 2.5rem; margin: 0; background: rgba(0,242,255,0.1); color: var(--accent-cyan); border: 1px solid var(--glass-border);">
+                                RK</div>
+                        </div>
+                        <h3 id="accMainName" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff;">Rakesh K
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">Entity ID:
+                            NX-821721</p>
+
+                        <div
+                            style="text-align: left; background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">PROTOCOL
+                                CLEARANCE</div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span
+                                    style="font-size: 0.65rem; background: rgba(0,242,255,0.1); color: var(--accent-cyan); padding: 4px 8px; border-radius: 4px;">GRID_ACCESS</span>
+                                <span
+                                    style="font-size: 0.65rem; background: rgba(168,85,247,0.1); color: var(--accent-purple); padding: 4px 8px; border-radius: 4px;">AUTOPAY_SYNC</span>
+                                <span
+                                    style="font-size: 0.65rem; background: rgba(16,185,129,0.1); color: #10b981; padding: 4px 8px; border-radius: 4px;">PREMIUM_NODE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Protocol Data -->
+                    <div class="telemetry-card" style="padding: 2.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="field">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">ENTITY
+                                    FIRST NAME</label>
+                                <input type="text" id="accFirst" class="acc-input" placeholder="RAKESH"
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;">
+                            </div>
+                            <div class="field">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">ENTITY
+                                    LAST NAME</label>
+                                <input type="text" id="accLast" class="acc-input" placeholder="K"
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;">
+                            </div>
+                            <div class="field" style="grid-column: span 2;">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">UNIVERSAL
+                                    IDENTIFIER (UID)</label>
+                                <input type="text" id="accUser" class="acc-input" disabled
+                                    placeholder="nec0824003@nttf.co.in"
+                                    style="background: rgba(255,255,255,0.05); border: 1px dashed var(--glass-border); color: var(--text-muted); cursor: not-allowed;">
+                            </div>
+                            <div class="field">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">MOBILE
+                                    NODE</label>
+                                <input type="text" id="accMobile" class="acc-input" placeholder="8217219362"
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;">
+                            </div>
+                            <div class="field">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">GEOGRAPHIC
+                                    SECTOR</label>
+                                <input type="text" id="accCity" class="acc-input" placeholder="Bangalore"
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;">
+                            </div>
+                            <div class="field" style="grid-column: span 2;">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">SECURE
+                                    EMAIL</label>
+                                <input type="email" id="accEmail" class="acc-input" placeholder="rakesh4800v@gmail.com"
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;">
+                            </div>
+                            <div class="field" style="grid-column: span 2;">
+                                <label
+                                    style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block;">PHYSICAL
+                                    GRID COORDINATES</label>
+                                <textarea id="accAddress" class="acc-input"
+                                    style="height: 80px; resize: none; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: #fff;"
+                                    placeholder="123 Neural Way, Silicon Grid Sector 4"></textarea>
+                            </div>
+                        </div>
+                        <button class="btn-primary"
+                            style="margin-top: 2rem; width: 100%; padding: 1.25rem; font-weight: 700; letter-spacing: 1px;"
+                            onclick="handleAccountUpdate()">
+                            UPDATE IDENTITY PROTOCOL
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    </main>
+    </div>
+    </div>
+
+    <!-- Scanner Modal Overlay -->
+    <div id="upiModal" class="scanner-modal">
+        <div class="scanner-content">
+            <h2 id="upiMethodName" style="margin-bottom: 0.5rem; color: #fff;">Scan to Pay</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 2rem;">Scan the code below using your
+                mobile app</p>
+
+            <div class="scanner-img-frame">
+                <div class="scanner-line"></div>
+                <img src="IOT scanner.jpeg" alt="IOT Scanner">
+            </div>
+
+            <button id="autopayBtn" class="btn-primary" style="width: 100%; padding: 1rem; margin-bottom: 1rem;"
+                onclick="enableAutopay()">
+                Set Neural Autopay
+            </button>
+            <button class="btn-secondary" style="width: 100%; padding: 1rem;" onclick="closeUPIModal()">
+                Cancel Protocol
+            </button>
+
+            <div id="autopaySuccess" class="autopay-badge">
+                <i data-lucide="check-circle" style="width:14px; vertical-align: middle; margin-right: 5px;"></i>
+                Neural Autopay Enabled
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <div class="logo-icon"
+                    style="margin: 0 auto 1.5rem; background: rgba(0,242,255,0.1); color: var(--accent-cyan);"><i
+                        data-lucide="user"></i></div>
+                <h3>Profile Protocol</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Modify your entity credentials.</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Entity Name</label>
+                <input type="text" id="editName" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Universal Identifier</label>
+                <input type="email" id="editEmail" class="form-input">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" style="flex: 1; padding: 1rem;"
+                    onclick="closeProfileModal()">Cancel</button>
+                <button class="btn-primary" style="flex: 1; padding: 1rem; box-shadow: none;"
+                    onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize UI on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Security Protocol: Clear session on refresh
+            localStorage.setItem('nexus_isLoggedIn', 'false');
+            localStorage.removeItem('nexus_currentUser');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateAuthUI();
+            showPage('home'); // Always start at the landing page
+        });
+
+        // Database Simulation
+        const getUsers = () => JSON.parse(localStorage.getItem('nexus_users') || '[]');
+        const saveUser = (user) => {
+            const users = getUsers();
+            users.push(user);
+            localStorage.setItem('nexus_users', JSON.stringify(users));
+        };
+
+        const updateUsers = (updatedUser) => {
+            const users = getUsers();
+            const index = users.findIndex(u => u.email === updatedUser.oldEmail || u.email === updatedUser.email);
+            if (index !== -1) {
+                delete updatedUser.oldEmail;
+                users[index] = updatedUser;
+                localStorage.setItem('nexus_users', JSON.stringify(users));
+            }
+        };
+
+        let isLoggedIn = localStorage.getItem('nexus_isLoggedIn') === 'true';
+
+        function showPage(id) {
+            console.log("Navigating to protocol:", id);
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            const target = document.getElementById(id);
+            if (target) {
+                target.classList.add("active");
+                window.scrollTo(0, 0);
+            }
+
+            // Toggle Main Nav visibility
+            const mainNav = document.getElementById('mainNav');
+            if (id === 'dashboard' || id === 'profile') {
+                if (mainNav) {
+                    mainNav.style.opacity = '0';
+                    mainNav.style.pointerEvents = 'none';
+                }
+            } else {
+                if (mainNav) {
+                    mainNav.style.opacity = '1';
+                    mainNav.style.pointerEvents = 'all';
+                }
+            }
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const signupLink = document.getElementById('signupNavLink');
+            const loginLink = document.getElementById('loginNavLink');
+            const logoutLink = document.getElementById('logoutNavLink');
+            const isUserLoggedIn = localStorage.getItem('nexus_isLoggedIn') === 'true';
+            const currentUser = JSON.parse(localStorage.getItem('nexus_currentUser') || '{}');
+
+            if (isUserLoggedIn) {
+                if (signupLink) signupLink.style.display = 'none';
+                if (loginLink) loginLink.style.display = 'none';
+                if (logoutLink) logoutLink.style.display = 'block';
+
+                // Name & Initials Protocol
+                const name = currentUser.name || "Entity Agent";
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                const elements = {
+                    'dashUserName': name,
+                    'accNameSidebar': name,
+                    'accMainName': name,
+                    'dropName': name,
+                    'dashAvatarLarge': initials,
+                    'dashAvatarMini': initials,
+                    'accAvatarSidebar': initials,
+                    'accAvatarBig': initials,
+                    'dropAvatar': initials
+                };
+
+                for (const [id, val] of Object.entries(elements)) {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = val;
+                }
+
+                // Field Population
+                const fields = {
+                    'accFirst': currentUser.firstName || name.split(' ')[0],
+                    'accLast': currentUser.lastName || name.split(' ')[1] || '',
+                    'accUser': currentUser.email,
+                    'accMobile': currentUser.mobile || '',
+                    'accCity': currentUser.city || '',
+                    'accEmail': currentUser.personalEmail || currentUser.email,
+                    'accAddress': currentUser.address || ''
+                };
+
+                for (const [id, val] of Object.entries(fields)) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                }
+            } else {
+                if (signupLink) signupLink.style.display = 'block';
+                if (loginLink) loginLink.style.display = 'block';
+                if (logoutLink) logoutLink.style.display = 'none';
+            }
+        }
+
+        function showDashSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+            // Show target section
+            const target = document.getElementById('section-' + sectionId);
+            if (target) target.classList.add('active');
+
+            // Update Nav styles
+            document.querySelectorAll('.dash-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick')?.includes(`'${sectionId}'`)) {
+                    item.classList.add('active');
+                }
+            });
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function toggleProfileDropdown() {
+            const drop = document.getElementById('profileDropdown');
+            drop.style.display = drop.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // Close dropdown on outside click
+        window.onclick = function (event) {
+            if (!event.target.matches('.avatar-mini')) {
+                const drops = document.getElementsByClassName("profile-dropdown");
+                for (let i = 0; i < drops.length; i++) {
+                    drops[i].style.display = "none";
+                }
+            }
+        }
+
+        function handleAccountUpdate() {
+            const user = JSON.parse(localStorage.getItem('nexus_currentUser') || '{}');
+            const updatedData = {
+                ...user,
+                name: document.getElementById('accFirst').value + ' ' + document.getElementById('accLast').value,
+                firstName: document.getElementById('accFirst').value,
+                lastName: document.getElementById('accLast').value,
+                mobile: document.getElementById('accMobile').value,
+                city: document.getElementById('accCity').value,
+                personalEmail: document.getElementById('accEmail').value,
+                address: document.getElementById('accAddress').value
+            };
+
+            updateUsers(updatedData);
+            localStorage.setItem('nexus_currentUser', JSON.stringify(updatedData));
+            updateAuthUI();
+            showPage('dashboard');
+        }
+
+        function handleDashboardClick() {
+            if (isLoggedIn) {
+                showPage('dashboard');
+            } else {
+                showPage('login');
+            }
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+            const confirm = document.getElementById('regConfirm').value;
+
+            if (!name || !email || !pass) return alert("Please fill all fields.");
+            if (pass !== confirm) return alert("Keys do not match.");
+
+            const users = getUsers();
+            if (users.find(u => u.email === email)) return alert("Entity already exists.");
+
+            saveUser({ name, email, pass });
+            alert("Registration successful! Access Uplink initialized.");
+            showPage('login');
+        }
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+
+            const users = getUsers();
+            const user = users.find(u => u.email === email && u.pass === pass);
+
+            if (user) {
+                isLoggedIn = true;
+                localStorage.setItem('nexus_isLoggedIn', 'true');
+                localStorage.setItem('nexus_currentUser', JSON.stringify(user));
+                showPage('dashboard');
+            } else {
+                alert("Invalid neural signature.");
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            localStorage.removeItem('nexus_isLoggedIn');
+            localStorage.removeItem('nexus_currentUser');
+            showPage('login');
+        }
+
+        // Profile Editing Logic
+        function openProfileModal() {
+            const user = JSON.parse(localStorage.getItem('nexus_currentUser') || '{}');
+            document.getElementById('editName').value = user.name || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        function saveProfile() {
+            const user = JSON.parse(localStorage.getItem('nexus_currentUser') || '{}');
+            const oldEmail = user.email;
+            const newName = document.getElementById('editName').value;
+            const newEmail = document.getElementById('editEmail').value;
+
+            if (!newName || !newEmail) return alert("All fields are required.");
+
+            const updatedUser = { ...user, name: newName, email: newEmail, oldEmail };
+
+            // Save to DB
+            updateUsers(updatedUser);
+
+            // Update Session
+            localStorage.setItem('nexus_currentUser', JSON.stringify(updatedUser));
+
+            updateAuthUI();
+            closeProfileModal();
+            alert("Profile synchronized successfully.");
+        }
+
+        // Initialize UI
+        updateAuthUI();
+
+        setInterval(() => {
+            const v = (70 + Math.random() * 10).toFixed(1);
+            const bar = document.getElementById('gasBar');
+            const text = document.getElementById('gasText');
+            if (bar && text) {
+                bar.style.width = v + '%';
+                text.innerText = v + '%';
+            }
+        }, 3000);
+        // UPI Scanner Logic
+        let currentUPIMethod = '';
+        function openUPIModal(method) {
+            currentUPIMethod = method;
+            document.getElementById('upiMethodName').innerText = method + ' Scanner';
+            document.getElementById('upiModal').classList.add('active');
+            document.getElementById('autopaySuccess').style.display = 'none';
+            document.getElementById('autopayBtn').style.display = 'block';
+        }
+
+        function closeUPIModal() {
+            document.getElementById('upiModal').classList.remove('active');
+        }
+
+        function enableAutopay() {
+            const btn = document.getElementById('autopayBtn');
+            btn.innerText = 'Syncing...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.style.display = 'none';
+                document.getElementById('autopaySuccess').style.display = 'block';
+                // Reset for next time after a delay or close
+                setTimeout(() => {
+                    alert('Neural Autopay has been synchronized for ' + currentUPIMethod);
+                    closeUPIModal();
+                    btn.innerText = 'Set Neural Autopay';
+                    btn.disabled = false;
+                }, 1500);
+            }, 2000);
+        }
+
+        // IoT ESP32 Real-Time Monitoring Module
+        let esp32_IP = localStorage.getItem('esp32_node_ip') || '';
+        let syncInterval = null;
+
+        function connectToESP32() {
+            const ip = prompt("Enter Grid Node (ESP32) IP Address:", esp32_IP || "192.168.1.100");
+            if (ip) {
+                esp32_IP = ip;
+                localStorage.setItem('esp32_node_ip', ip);
+                document.getElementById('connectedNodeIP').innerText = ip;
+                startIoTProtocol();
+            }
+        }
+
+        function startIoTProtocol() {
+            if (syncInterval) clearInterval(syncInterval);
+            document.getElementById('connectedNodeIP').innerText = esp32_IP;
+            
+            syncInterval = setInterval(async () => {
+                if (!esp32_IP) return;
+                
+                try {
+                    // Handshake with physical ESP32
+                    const response = await fetch(`http://${esp32_IP}/data`, { mode: 'cors' });
+                    const data = await response.json();
+                    
+                    /* 
+                       ESP32 Expected JSON Template:
+                       { "gas": 45, "volt": 230.2, "load": 4.5 }
+                    */
+                    
+                    updateDashboardTelemetry(data);
+                    
+                } catch (err) {
+                    // Fallback to simulation if hardware is not yet connected
+                    console.warn("Hardware Not Found - Entering Simulation Mode");
+                    const mockData = {
+                        gas: Math.floor(Math.random() * 100),
+                        volt: (220 + Math.random() * 20).toFixed(1),
+                        load: (3.5 + Math.random() * 2).toFixed(2)
+                    };
+                    updateDashboardTelemetry(mockData);
+                }
+            }, 2000);
+        }
+
+        function updateDashboardTelemetry(data) {
+            // Update Circular Gauge
+            const gauge = document.querySelector('.gauge-fill');
+            const gasText = document.getElementById('liveGasValue');
+            if (gauge && gasText) {
+                const offset = 440 - (440 * (data.gas / 100));
+                gauge.style.strokeDashoffset = offset;
+                gasText.innerText = data.gas + '%';
+            }
+
+            // Update Telemetry Cards
+            document.getElementById('liveVoltage').innerText = data.volt + ' V';
+            document.getElementById('liveLoad').innerText = data.load + ' kW';
+            document.getElementById('liveDailyAvg').innerText = (data.gas / 25).toFixed(2) + ' kg';
+
+            // Visual Handshake Confirmation
+            const badge = document.getElementById('systemStatusBadge');
+            const dot = document.getElementById('nodeStatusDot');
+            if (badge) {
+                badge.style.opacity = '1';
+                badge.innerHTML = '<i data-lucide="check-circle" style="width:16px;"></i> System Operational';
+                dot.style.background = 'var(--accent-cyan)';
+                dot.style.boxShadow = '0 0 10px var(--accent-cyan)';
+            }
+        }
+
+        function setNodeOffline() {
+            const badge = document.getElementById('systemStatusBadge');
+            const dot = document.getElementById('nodeStatusDot');
+            if (badge) {
+                badge.style.opacity = '0.5';
+                badge.innerHTML = '<i data-lucide="cloud-off" style="width:16px;"></i> System Offline';
+                dot.style.background = '#ef4444';
+                dot.style.boxShadow = '0 0 10px #ef4444';
+            }
+        }
+
+        // Initialize Real-Time Connection
+        if (esp32_IP) startIoTProtocol();
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    </script>
+</body>
+
+</html>

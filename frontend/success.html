@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusGas | Order Confirmed</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Manrope:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020617;
+            --accent: #10b981;
+            /* Success Green */
+            --blue: #22d3ee;
+            --glass: rgba(15, 23, 42, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* 3D Background Decoration */
+        .orb {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15), transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(80px);
+            animation: float 20s infinite alternate;
+        }
+
+        @keyframes float {
+            from {
+                transform: translate(-20%, -20%);
+            }
+
+            to {
+                transform: translate(20%, 20%);
+            }
+        }
+
+        .success-card {
+            width: min(95%, 800px);
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+            animation: cardPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes cardPop {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .check-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 3rem;
+            margin: 0 auto 30px;
+            box-shadow: 0 0 50px rgba(16, 185, 129, 0.4);
+            animation: checkBounce 1s 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes checkBounce {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .order-id {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-family: 'Space Grotesk';
+            color: var(--blue);
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+        }
+
+        .summary-item span {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
+        .summary-item strong {
+            font-size: 1.1rem;
+        }
+
+        .next-steps {
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        .next-steps h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            background: var(--blue);
+            color: #000;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 20px 50px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .btn.syncing {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: wait;
+            border: 1px solid var(--blue);
+        }
+    </style>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+
+<body>
+    <div class="orb"></div>
+
+    <div class="success-card">
+        <div class="check-icon">✓</div>
+        <h1>Your Order is Done!</h1>
+        <div class="order-id" id="orderID">NX-BOK-7721</div>
+
+        <!-- Automated Email Notification -->
+        <div id="emailNotify"
+            style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 15px; border-radius: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; text-align: left; animation: emailSlide 0.5s 1s both;">
+            <div
+                style="width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: grid; place-items: center; color: #000; font-size: 1.2rem;">
+                ✉</div>
+            <div>
+                <strong style="display: block; font-size: 0.9rem; color: var(--accent);">An Email sent to this "<b
+                        class="email-val" style="color: #fff;">...</b>"</strong>
+                <span style="font-size: 0.8rem; color: #94a3b8;">A copy of your receipt has been sent to this
+                    Email</span>
+            </div>
+        </div>
+
+        <style>
+            @keyframes emailSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span>Customer</span>
+                <strong id="custName">Rakesh Kumar</strong>
+            </div>
+            <div class="summary-item">
+                <span>Contact</span>
+                <strong id="custPhone">+91 XXXXX XXXXX</strong>
+            </div>
+            <div class="summary-item" style="grid-column: 1 / -1;">
+                <span>Installation Point</span>
+                <strong id="custAddr">Loading address...</strong>
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <h3><span style="color: var(--blue)">▹</span> What happens next?</h3>
+            <div class="step-row">
+                <div class="step-num">1</div>
+                <p>Our admin team will verify your uploaded documents within 2 hours.</p>
+            </div>
+            <div class="step-row">
+                <div class="step-num">2</div>
+                <p>An expert technician will call you to schedule the smart valve setup.</p>
+            </div>
+            <div class="step-row">
+                <div class="step-num">3</div>
+                <p>Your IoT login credentials will be sent to your registered email.</p>
+            </div>
+        </div>
+
+        <button onclick="delayedRedirect(this)" class="btn" id="returnBtn">Return to Dashboard</button>
+    </div>
+
+    <script>
+        // In a real app, you'd pull this from LocalStorage or a Database
+        // For this demo, let's pull from what we saved in the session
+        // Strict Data Retrieval with Neural Fallbacks
+        const name = localStorage.getItem('nexus_name') || 'Valued Customer';
+        const phone = localStorage.getItem('nexus_phone') || 'Contact Not Provided';
+        let email = localStorage.getItem('nexus_email');
+        if (!email || email.trim() === "") email = "guest@nexusgas.com"; // System Fallback
+        
+        const addr = localStorage.getItem('nexus_addr') || 'Registered Installation Point';
+        const ref = localStorage.getItem('nexus_ref') || 'NX-BOK-' + Math.floor(1000 + Math.random() * 9000);
+
+        document.getElementById('custName').textContent = name;
+        document.getElementById('custPhone').textContent = phone;
+        document.querySelectorAll('.email-val').forEach(el => el.textContent = email);
+        document.getElementById('custAddr').textContent = addr;
+        document.getElementById('orderID').textContent = ref;
+
+        // --- Neural Dispatch Logic ---
+        (function () {
+            emailjs.init("x0b5ipCI_M0Lmes0Q"); // Updated Public Key
+        })();
+
+        const accessKey = `NX-SEC-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        function delayedRedirect(btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite; margin-right:10px;">↻</span> Dispatching Credentials...';
+            btn.classList.add('syncing');
+
+            // Dispatch Login Details during delay
+            const templateParams = {
+                to_name: name,
+                email: email, // Matched to your {{email}} tag
+                order_id: ref,
+                message: `THIS IS YOUR LOGIN DETAILS: \nEmail: ${email}\nNeural Access Key: ${accessKey}`
+            };
+
+            emailjs.send('service_3fr5qhg', 'template_0642g5l', templateParams)
+                .then(() => {
+                    console.log('CREDENTIALS DISPATCHED');
+                    btn.innerHTML = '<i data-lucide="check-circle" style="width:16px; margin-right:8px;"></i> Email Sent! Launching...';
+                    setTimeout(() => {
+                        window.location.href = 'indexmainofprj.html';
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('DISPATCH FAILED', err);
+                    alert("🚨 Neural Dispatch Error: " + err.text + "\n\nPlease check if your Service ID (service_3fr5qhg) or Template ID (template_0642g5l) is active in EmailJS.");
+                    btn.innerHTML = "Retry Handshake";
+                    btn.classList.remove('syncing');
+                });
+        }
+    </script>
+    <style>
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusGas | Admin Control Center</title>
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --accent: #ff00c8;
+            --bg-dark: #05060a;
+            --bg-card: rgba(15, 18, 28, 0.7);
+            --text-main: #ffffff;
+            --text-dim: #a0a0b0;
+            --accent-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --success: #00ffa3;
+            --warning: #ffb800;
+            --danger: #ff4b4b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.1) 0%, transparent 40%),
+                url('admin_bg.png');
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* --- Login Section --- */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 6, 10, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        #login-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-card p {
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(112, 0, 255, 0.3);
+        }
+
+        .login-error {
+            color: var(--danger);
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* --- Dashboard UI --- */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: rgba(10, 11, 16, 0.8);
+            border-right: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem 1.5rem;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 3rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-item.active, .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .btn-logout {
+            margin-top: auto;
+            padding: 1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 75, 75, 0.3);
+            color: var(--danger);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 75, 75, 0.1);
+            border-color: var(--danger);
+        }
+
+        /* Content Area */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 3rem 4rem;
+            max-width: 1400px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4rem;
+        }
+
+        header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .admin-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 0.8rem 1.5rem;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--accent-gradient);
+            filter: blur(80px);
+            opacity: 0.1;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .stat-trend {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trend-up { color: var(--success); }
+
+        /* Tables */
+        .content-section {
+            background: var(--bg-card);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 1.2rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 1.5rem 1.2rem;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 1rem;
+        }
+
+        .role-pill {
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-dim);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            background: rgba(255, 75, 75, 0.05);
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 242, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-dim);
+        }
+
+        /* Fix for backdrop-filter warnings */
+        .sidebar, .stat-card, .content-section, #login-overlay {
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2>Admin Login</h2>
+            <p>Access the NexusGas Control Center</p>
+            <div id="login-error" class="login-error">Invalid credentials or access denied.</div>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" value="admin@nexus.com" placeholder="admin@nexus.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Security Key</label>
+                    <input type="password" id="password" value="admin123" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-login">Authorize Access</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="logo-area">
+            <div class="logo-icon">NG</div>
+            <div class="logo-text">NexusGas Admin</div>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item active" onclick="switchTab(this, 'dashboard')">
+                <i>📊</i> Dashboard
+            </li>
+            <li class="nav-item" onclick="switchTab(this, 'users')">
+                <i>👥</i> User Management
+            </li>
+            <li class="nav-item" onclick="switchTab(this, 'iot')">
+                <i>🔋</i> IoT Nodes
+            </li>
+            <li class="nav-item" onclick="switchTab(this, 'security')">
+                <i>🛡️</i> Security Logs
+            </li>
+            <li class="nav-item" onclick="switchTab(this, 'settings')">
+                <i>⚙️</i> System Settings
+            </li>
+        </ul>
+        <button class="btn-logout" onclick="logout()">Terminate Session</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <div>
+                <h1>Control Center</h1>
+                <p style="color: var(--text-dim); margin-top: 0.5rem;">System monitoring and infrastructure management</p>
+            </div>
+            <div class="admin-badge">
+                <div class="avatar" id="admin-initials">A</div>
+                <div>
+                    <div id="admin-name" style="font-weight: 600; font-size: 0.95rem;">Administrator</div>
+                    <div style="font-size: 0.75rem; color: var(--primary);">Root Access</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Active Deployments</span>
+                <div class="stat-value" id="stat-users">0</div>
+                <div class="stat-trend trend-up">
+                    <span>↑ 12%</span> from last month
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">System Integrity</span>
+                <div class="stat-value" id="stat-integrity">99.9%</div>
+                <div class="stat-trend trend-up">
+                    <span>Optimal</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Node Status</span>
+                <div class="stat-value" id="stat-nodes">Active</div>
+                <div class="stat-trend" style="color: var(--primary);">
+                    <span>24/7 Monitoring</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div id="users-section" class="content-section">
+            <div class="section-header">
+                <h2>User Infrastructure</h2>
+                <div style="color: var(--text-dim); font-size: 0.9rem;">Total Records: <span id="total-records">0</span></div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Endpoint (Email)</th>
+                        <th>Created</th>
+                        <th>Access Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    <!-- Dynamic Content -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- IoT Nodes Section (New) -->
+        <div id="iot-section" class="content-section hidden">
+            <div class="section-header">
+                <h2>IoT Infrastructure</h2>
+                <div style="color: var(--text-dim); font-size: 0.9rem;">Active Nodes: 12</div>
+            </div>
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <span class="stat-label">Node-01 (Gas Sensor)</span>
+                    <div class="stat-value" style="font-size: 1.5rem; color: var(--success);">Normal</div>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Pressure: 2.4 bar</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Node-02 (Safety Valve)</span>
+                    <div class="stat-value" style="font-size: 1.5rem; color: var(--primary);">Secured</div>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">Last Check: 2 mins ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Logs Section (New) -->
+        <div id="security-section" class="content-section hidden">
+            <div class="section-header">
+                <h2>Security Protocol Logs</h2>
+            </div>
+            <table style="font-size: 0.9rem;">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Event</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-04-24 18:30:12</td>
+                        <td>Admin Authorization</td>
+                        <td>192.168.1.45</td>
+                        <td><span class="role-pill" style="background: rgba(46, 213, 115, 0.1); color: #2ed573;">SUCCESS</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-04-24 17:15:45</td>
+                        <td>System Integrity Check</td>
+                        <td>Auto-Protocol</td>
+                        <td><span class="role-pill">OPTIMAL</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- System Settings Section (New) -->
+        <div id="settings-section" class="content-section hidden">
+            <div class="section-header">
+                <h2>Infrastructure Configuration</h2>
+            </div>
+            <div style="display: grid; gap: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                    <div>
+                        <div style="font-weight: 600;">Automated Safety Protocols</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">Auto-shutoff valve on leak detection</div>
+                    </div>
+                    <div style="width: 40px; height: 20px; background: var(--primary); border-radius: 20px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 12px;">
+                    <div>
+                        <div style="font-weight: 600;">Maintenance Alerts</div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">Notify admin on node failure</div>
+                    </div>
+                    <div style="width: 40px; height: 20px; background: var(--glass-border); border-radius: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = window.location.origin + '/api'; 
+        
+        // --- Auth Logic ---
+        const loginForm = document.getElementById('login-form');
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginError = document.getElementById('login-error');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const targetUrl = `${API_BASE}/auth/login`;
+                console.log('Attempting login at:', targetUrl);
+
+                const response = await fetch(targetUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                console.log('Server response status:', response.status);
+
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response body:', text);
+                    throw new Error(`Server returned status ${response.status} (${response.statusText}). Body: ${text.substring(0, 100)}`);
+                }
+
+                if (!response.ok) throw new Error(data.message || `Login failed (${response.status})`);
+                
+                if (data.user.role !== 'admin') {
+                    throw new Error('Access Denied: Administrative privileges required');
+                }
+
+                localStorage.setItem('adminToken', data.token);
+                showDashboard(data.user);
+            } catch (err) {
+                console.error('Login error details:', err);
+                loginError.innerHTML = `<strong>Error:</strong> ${err.message}<br><small>Check browser console (F12) for more details.</small>`;
+                loginError.style.display = 'block';
+            }
+        });
+
+        async function checkInitialAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE}/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const user = await response.json();
+                    if (response.ok && user.role === 'admin') {
+                        showDashboard(user);
+                        return;
+                    }
+                } catch (err) {}
+                localStorage.removeItem('adminToken');
+            }
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function showDashboard(user) {
+            loginOverlay.classList.add('hidden');
+            document.getElementById('loader').style.display = 'none';
+            if (user) {
+                document.getElementById('admin-name').textContent = user.name;
+                document.getElementById('admin-initials').textContent = user.name.charAt(0).toUpperCase();
+            }
+            loadAdminData();
+        }
+
+        async function loadAdminData() {
+            const token = localStorage.getItem('adminToken');
+            try {
+                // Load Stats
+                const statsRes = await fetch(`${API_BASE}/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const stats = await statsRes.json();
+                document.getElementById('stat-users').textContent = stats.totalUsers;
+                document.getElementById('total-records').textContent = stats.totalUsers;
+
+                // Load Users
+                const usersRes = await fetch(`${API_BASE}/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await usersRes.json();
+                
+                const tableBody = document.getElementById('user-table-body');
+                tableBody.innerHTML = '';
+
+                users.forEach(u => {
+                    const date = new Date(u.created_at).toLocaleDateString();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 600;">${u.name}</td>
+                        <td style="color: var(--text-dim);">${u.email}</td>
+                        <td>${date}</td>
+                        <td><span class="role-pill">${u.role}</span></td>
+                        <td>
+                            <button class="btn-action" onclick="deleteUser(${u.id})">🗑️</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Data load error:', err);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this user? This action is irreversible.')) return;
+            
+            const token = localStorage.getItem('adminToken');
+            try {
+                const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) loadAdminData();
+                else alert('Failed to delete user');
+            } catch (err) {
+                alert('Error connecting to server');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.reload();
+        }
+
+        function switchTab(el, tabId) {
+            // Update UI active state
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Hide all sections first
+            document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+            
+            if (tabId === 'dashboard') {
+                // Dashboard shows everything or just the overview
+                document.getElementById('users-section').classList.remove('hidden');
+                document.querySelector('.stats-grid').style.display = 'grid';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Show specific section
+                const section = document.getElementById(`${tabId}-section`);
+                if (section) {
+                    section.classList.remove('hidden');
+                    // Hide main stats grid on sub-pages for focus
+                    document.querySelector('.stats-grid').style.display = (tabId === 'users' || tabId === 'dashboard') ? 'grid' : 'none';
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Init
+        checkInitialAuth();
+    </script>
+</body>
+</html>
