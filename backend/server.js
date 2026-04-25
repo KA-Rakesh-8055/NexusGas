@@ -13,6 +13,11 @@ initAndSeed();
 app.use(cors());
 app.use(express.json());
 
+// Test Route
+app.get("/test", (req, res) => {
+  res.send("Backend working fine");
+});
+
 // Request Logger
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
