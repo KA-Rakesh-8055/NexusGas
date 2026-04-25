@@ -1,10 +1,15 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
 const jwt = require("jsonwebtoken");
+const { authMiddleware, adminMiddleware } = require("../middleware/authMiddleware");
 
+
+// ✅ 1. LOGIN FIRST (no middleware here)
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 1. Check user in DB
     const result = await db.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
@@ -16,24 +21,20 @@ router.post("/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // 2. Check password (simple for now)
     if (password !== user.password) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // 3. Check admin role
     if (user.role !== "admin") {
       return res.status(403).json({ message: "Not an admin" });
     }
 
-    // 4. Generate token
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // 5. Send token
     res.json({ token });
 
   } catch (err) {
@@ -41,3 +42,17 @@ router.post("/login", async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+
+// 🔒 2. APPLY MIDDLEWARE AFTER LOGIN
+router.use(authMiddleware);
+router.use(adminMiddleware);
+
+
+// 🔒 3. PROTECTED ROUTES
+router.get("/users", async (req, res) => {
+  const result = await db.query("SELECT * FROM users");
+  res.json(result.rows);
+});
+
+module.exports = router;
