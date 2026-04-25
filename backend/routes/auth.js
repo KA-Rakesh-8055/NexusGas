@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
       payload,
       process.env.JWT_SECRET,
       { expiresIn: '24h' },
-      (err, token) => {
+      async (err, token) => {
         if (err) throw err;
         // Update Last Login & Online Status
         await db.query(
