@@ -56,29 +56,23 @@ router.post('/login', async (req, res) => {
       role: user.role
     };
 
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' },
-      async (err, token) => {
-        if (err) throw err;
-        // Update Last Login & Online Status
-        await db.query(
-          "UPDATE users SET last_login = NOW(), is_online = TRUE WHERE id = $1",
-          [user.id]
-        );
-
-        res.json({ 
-          token, 
-          user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role
-          }
-        });
-      }
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '24h' });
+    
+    // Update Last Login & Online Status
+    await db.query(
+      "UPDATE users SET last_login = NOW(), is_online = TRUE WHERE id = $1",
+      [user.id]
     );
+
+    res.json({ 
+      token, 
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server Error" });

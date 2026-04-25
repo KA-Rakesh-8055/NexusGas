@@ -502,7 +502,7 @@
                 <i>⚙️</i> System Settings
             </li>
         </ul>
-        <button class="btn-logout" onclick="logout()">Terminate Session</button>
+        <button class="btn-logout" onclick="logoutAdmin()">Terminate Session</button>
     </nav>
 
     <!-- Main Content -->
@@ -645,7 +645,7 @@
     </main>
 
     <script>
-        const API_BASE = 'https://nexusgas.onrender.com/api'; 
+        const API_BASE = window.location.origin + '/api'; 
         
         // --- Auth Logic ---
         const loginForm = document.getElementById('login-form');
@@ -686,6 +686,7 @@
                 }
 
                 localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminName', data.user.name);
                 showDashboard(data.user);
             } catch (err) {
                 console.error('Login error details:', err);
@@ -695,8 +696,13 @@
         });
 
         function checkInitialAuth() {
-            // Simplified: User must login manually or we can add a local token check later
-            document.getElementById('loader').style.display = 'none';
+            const token = localStorage.getItem('adminToken');
+            const adminName = localStorage.getItem('adminName');
+            if (token && adminName) {
+                showDashboard({ name: adminName });
+            } else {
+                document.getElementById('loader').style.display = 'none';
+            }
         }
 
         function showDashboard(user) {
@@ -706,23 +712,38 @@
                 document.getElementById('admin-name').textContent = user.name;
                 document.getElementById('admin-initials').textContent = user.name.charAt(0).toUpperCase();
             }
-            loadAdminData();
+            fetchUsers();
         }
 
-        async function loadAdminData() {
+        async function fetchUsers() {
             const token = localStorage.getItem('adminToken');
+            if (!token) return;
             try {
                 // Load Stats
                 const statsRes = await fetch(`${API_BASE}/admin/stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
+                
+                if (statsRes.status === 401 || statsRes.status === 403) {
+                    logoutAdmin();
+                    return;
+                }
+                
                 const stats = await statsRes.json();
                 document.getElementById('stat-users').textContent = stats.totalUsers;
                 document.getElementById('total-records').textContent = stats.totalUsers;
+                if (stats.systemIntegrity) document.getElementById('stat-integrity').textContent = stats.systemIntegrity;
+                if (stats.nodeStatus) document.getElementById('stat-nodes').textContent = stats.nodeStatus;
 
                 // Load Users
                 const usersRes = await fetch(`${API_BASE}/admin/users`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
                 const users = await usersRes.json();
                 
@@ -774,7 +795,10 @@
             try {
                 await fetch(`${API_BASE}/admin/users/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
                 fetchUsers();
             } catch (err) {
@@ -787,10 +811,14 @@
             try {
                 await fetch(`${API_BASE}/admin/logout`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 });
             } catch (err) {}
             localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminName');
             window.location.reload();
         }
 
