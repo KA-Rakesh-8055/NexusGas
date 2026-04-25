@@ -366,6 +366,18 @@
             border-bottom: 1px solid var(--glass-border);
             font-size: 1rem;
         }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .status-online {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+        .status-offline {
+            background: #4b5563;
+        }
 
         .role-pill {
             padding: 6px 14px;
@@ -545,8 +557,9 @@
                     <tr>
                         <th>Identity</th>
                         <th>Endpoint (Email)</th>
-                        <th>Created</th>
                         <th>Access Level</th>
+                        <th>Last Active</th>
+                        <th>Created</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -645,7 +658,7 @@
             const password = document.getElementById('password').value;
 
             try {
-                const targetUrl = `${API_BASE}/auth/login`;
+                const targetUrl = `${API_BASE}/admin/login`;
                 console.log('Attempting login at:', targetUrl);
 
                 const response = await fetch(targetUrl, {
@@ -681,21 +694,8 @@
             }
         });
 
-        async function checkInitialAuth() {
-            const token = localStorage.getItem('adminToken');
-            if (token) {
-                try {
-                    const response = await fetch(`${API_BASE}/auth/me`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const user = await response.json();
-                    if (response.ok && user.role === 'admin') {
-                        showDashboard(user);
-                        return;
-                    }
-                } catch (err) {}
-                localStorage.removeItem('adminToken');
-            }
+        function checkInitialAuth() {
+            // Simplified: User must login manually or we can add a local token check later
             document.getElementById('loader').style.display = 'none';
         }
 
@@ -731,12 +731,29 @@
 
                 users.forEach(u => {
                     const date = new Date(u.created_at).toLocaleDateString();
+                    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleString() : 'Never';
+                    
+                    const statusClass = u.is_online ? 'status-online' : 'status-offline';
+                    const statusText = u.is_online ? 'ONLINE' : 'OFFLINE';
+                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td style="font-weight: 600;">${u.name}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="avatar-mini">${u.name.charAt(0)}</div>
+                                <div style="font-weight: 600;">${u.name}</div>
+                            </div>
+                        </td>
                         <td style="color: var(--text-dim);">${u.email}</td>
-                        <td>${date}</td>
-                        <td><span class="role-pill">${u.role}</span></td>
+                        <td><span class="role-pill">${u.role.toUpperCase()}</span></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="status-dot ${statusClass}"></div>
+                                <span style="font-size: 0.75rem; font-weight: 700; color: ${u.is_online ? 'var(--accent-cyan)' : 'var(--text-dim)'};">${statusText}</span>
+                            </div>
+                        </td>
+                        <td style="font-size: 0.8rem; color: var(--accent);">${lastLogin}</td>
+                        <td style="font-size: 0.85rem; color: var(--text-dim);">${date}</td>
                         <td>
                             <button class="btn-action" onclick="deleteUser(${u.id})">🗑️</button>
                         </td>
@@ -744,27 +761,35 @@
                     tableBody.appendChild(tr);
                 });
             } catch (err) {
-                console.error('Data load error:', err);
+                console.error('Fetch users error:', err);
             }
         }
 
+        // --- Live Polling ---
+        setInterval(fetchUsers, 10000); // Update user list every 10 seconds
+
         async function deleteUser(id) {
-            if (!confirm('Are you sure you want to delete this user? This action is irreversible.')) return;
-            
+            if (!confirm('Are you sure you want to decommission this entity?')) return;
             const token = localStorage.getItem('adminToken');
             try {
-                const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+                await fetch(`${API_BASE}/admin/users/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) loadAdminData();
-                else alert('Failed to delete user');
+                fetchUsers();
             } catch (err) {
-                alert('Error connecting to server');
+                console.error('Delete error:', err);
             }
         }
 
-        function logout() {
+        async function logoutAdmin() {
+            const token = localStorage.getItem('adminToken');
+            try {
+                await fetch(`${API_BASE}/admin/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) {}
             localStorage.removeItem('adminToken');
             window.location.reload();
         }

@@ -12,7 +12,7 @@ router.post("/login", async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT * FROM users WHERE email = $1",
+      "SELECT id, name, email, password, role FROM users WHERE email = $1",
       [email]
     );
 
@@ -38,7 +38,21 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ token });
+    // 🔥 Update Last Login & Online Status
+    await db.query(
+      "UPDATE users SET last_login = NOW(), is_online = TRUE WHERE id = $1",
+      [user.id]
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
 
   } catch (err) {
     console.error(err.message);
@@ -51,10 +65,20 @@ router.post("/login", async (req, res) => {
 router.use(authMiddleware);
 router.use(adminMiddleware);
 
+// ✅ Logout Route
+router.post("/logout", async (req, res) => {
+  try {
+    await db.query("UPDATE users SET is_online = FALSE WHERE id = $1", [req.user.id]);
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).send("Server Error");
+  }
+});
+
 
 // 🔒 3. PROTECTED ROUTES
 router.get("/users", async (req, res) => {
-  const result = await db.query("SELECT id, name, email, role, created_at FROM users");
+  const result = await db.query("SELECT id, name, email, role, last_login, is_online, created_at FROM users ORDER BY is_online DESC, last_login DESC");
   res.json(result.rows);
 });
 

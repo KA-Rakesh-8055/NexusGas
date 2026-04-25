@@ -62,10 +62,17 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' },
       (err, token) => {
         if (err) throw err;
+        // Update Last Login & Online Status
+        await db.query(
+          "UPDATE users SET last_login = NOW(), is_online = TRUE WHERE id = $1",
+          [user.id]
+        );
+
         res.json({ 
           token, 
           user: {
             id: user.id,
+            name: user.name,
             email: user.email,
             role: user.role
           }
@@ -84,6 +91,18 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     const result = await db.query('SELECT id, name, email, role, created_at FROM users WHERE id = $1', [req.user.id]);
     res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// @route   POST /logout
+// @desc    Logout user
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    await db.query('UPDATE users SET is_online = FALSE WHERE id = $1', [req.user.id]);
+    res.json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Server Error' });
