@@ -54,7 +54,7 @@ router.use(adminMiddleware);
 
 // 🔒 3. PROTECTED ROUTES
 router.get("/users", async (req, res) => {
-  const result = await db.query("SELECT * FROM users");
+  const result = await db.query("SELECT id, name, email, role, created_at FROM users");
   res.json(result.rows);
 });
 
