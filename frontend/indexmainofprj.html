@@ -2374,7 +2374,7 @@
             }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
@@ -2383,35 +2383,80 @@
             if (!name || !email || !pass) return alert("Please fill all fields.");
             if (pass !== confirm) return alert("Keys do not match.");
 
-            const users = getUsers();
-            if (users.find(u => u.email === email)) return alert("Entity already exists.");
+            console.log("[Frontend] Attempting API Signup for:", email);
 
-            saveUser({ name, email, pass });
-            alert("Registration successful! Access Uplink initialized.");
-            showPage('login');
-        }
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password: pass })
+                });
 
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
+                const data = await response.json();
+                console.log("[Frontend] Signup API Response:", data);
 
-            const users = getUsers();
-            const user = users.find(u => u.email === email && u.pass === pass);
+                if (!response.ok) throw new Error(data.message || 'Registration failed');
 
-            if (user) {
-                isLoggedIn = true;
-                localStorage.setItem('nexus_isLoggedIn', 'true');
-                localStorage.setItem('nexus_currentUser', JSON.stringify(user));
-                showPage('dashboard');
-            } else {
-                alert("Invalid neural signature.");
+                alert("Registration successful! Access Uplink initialized.");
+                showPage('login');
+            } catch (err) {
+                console.error("Signup error:", err);
+                alert("Error: " + err.message);
             }
         }
 
-        function logout() {
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+
+            console.log("[Frontend] Attempting API Login for:", email);
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password: pass })
+                });
+
+                const data = await response.json();
+                console.log("[Frontend] Login API Response:", data);
+
+                if (!response.ok) throw new Error(data.message || 'Login failed');
+
+                isLoggedIn = true;
+                localStorage.setItem('nexus_isLoggedIn', 'true');
+                localStorage.setItem('nexus_token', data.token);
+                localStorage.setItem('nexus_currentUser', JSON.stringify(data.user));
+                showPage('dashboard');
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("Invalid neural signature. " + err.message);
+            }
+        }
+
+        async function logout() {
+            console.log("[Frontend] Attempting API Logout");
+            const token = localStorage.getItem('nexus_token');
+            if (token) {
+                try {
+                    const response = await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}` 
+                        }
+                    });
+                    const data = await response.json();
+                    console.log("[Frontend] Logout API Response:", data);
+                } catch (err) {
+                    console.error("Logout error:", err);
+                }
+            }
+
             isLoggedIn = false;
             localStorage.removeItem('nexus_isLoggedIn');
             localStorage.removeItem('nexus_currentUser');
+            localStorage.removeItem('nexus_token');
             showPage('login');
         }
 
