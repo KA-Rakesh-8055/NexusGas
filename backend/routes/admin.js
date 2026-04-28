@@ -68,7 +68,7 @@ router.use(adminMiddleware);
 // ✅ Logout Route
 router.post("/logout", async (req, res) => {
   try {
-    await db.query("UPDATE users SET is_online = FALSE WHERE id = $1", [req.user.id]);
+    await db.query("UPDATE users SET is_online = FALSE, last_logout = NOW() WHERE id = $1", [req.user.id]);
     return res.json({ message: "Logged out successfully" });
   } catch (err) {
     return res.status(500).send("Server Error");
@@ -79,7 +79,9 @@ router.post("/logout", async (req, res) => {
 // 🔒 3. PROTECTED ROUTES
 router.get("/users", async (req, res) => {
   try {
-    const result = await db.query("SELECT id, name, email, role, last_login, last_logout, is_online, created_at FROM users WHERE role = 'user' ORDER BY is_online DESC, last_login DESC");
+    console.log("[API] GET /admin/users - Fetching all user and admin activity");
+    const result = await db.query("SELECT id, name, email, role, last_login, last_logout, is_online, created_at FROM users ORDER BY is_online DESC, last_login DESC");
+    console.log(`[API] GET /admin/users - Found ${result.rows.length} records`);
     return res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -90,14 +92,17 @@ router.get("/users", async (req, res) => {
 // ✅ Get Stats
 router.get("/stats", async (req, res) => {
   try {
-    const totalResult = await db.query("SELECT COUNT(*) as count FROM users WHERE role = 'user'");
-    const onlineResult = await db.query("SELECT COUNT(*) as count FROM users WHERE role = 'user' AND is_online = TRUE");
-    return res.json({
+    console.log("[API] GET /admin/stats - Fetching statistics");
+    const totalResult = await db.query("SELECT COUNT(*) as count FROM users");
+    const onlineResult = await db.query("SELECT COUNT(*) as count FROM users WHERE is_online = TRUE");
+    const stats = {
       totalUsers: parseInt(totalResult.rows[0].count),
       onlineUsers: parseInt(onlineResult.rows[0].count),
       systemIntegrity: "99.9%",
       nodeStatus: "Active"
-    });
+    };
+    console.log("[API] GET /admin/stats - Result:", stats);
+    return res.json(stats);
   } catch (err) {
     console.error(err.message);
     return res.status(500).send("Server Error");
