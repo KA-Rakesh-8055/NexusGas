@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     role VARCHAR(20) DEFAULT 'user',
     last_login TIMESTAMP,
+    last_logout TIMESTAMP,
     is_online BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

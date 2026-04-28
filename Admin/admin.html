@@ -524,10 +524,17 @@
         <!-- Stats Section -->
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-label">Active Deployments</span>
+                <span class="stat-label">Active Users</span>
                 <div class="stat-value" id="stat-users">0</div>
                 <div class="stat-trend trend-up">
-                    <span>↑ 12%</span> from last month
+                    <span>Total Registered</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Online Users</span>
+                <div class="stat-value" id="stat-online">0</div>
+                <div class="stat-trend trend-up">
+                    <span style="color: var(--success);">Live Tracking</span>
                 </div>
             </div>
             <div class="stat-card">
@@ -558,8 +565,9 @@
                         <th>Identity</th>
                         <th>Endpoint (Email)</th>
                         <th>Access Level</th>
-                        <th>Last Active</th>
-                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Login Time</th>
+                        <th>Logout Time</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -734,6 +742,7 @@
                 
                 const stats = await statsRes.json();
                 document.getElementById('stat-users').textContent = stats.totalUsers;
+                document.getElementById('stat-online').textContent = stats.onlineUsers || 0;
                 document.getElementById('total-records').textContent = stats.totalUsers;
                 if (stats.systemIntegrity) document.getElementById('stat-integrity').textContent = stats.systemIntegrity;
                 if (stats.nodeStatus) document.getElementById('stat-nodes').textContent = stats.nodeStatus;
@@ -751,8 +760,8 @@
                 tableBody.innerHTML = '';
 
                 users.forEach(u => {
-                    const date = new Date(u.created_at).toLocaleDateString();
                     const lastLogin = u.last_login ? new Date(u.last_login).toLocaleString() : 'Never';
+                    const lastLogout = u.last_logout ? new Date(u.last_logout).toLocaleString() : 'Never';
                     
                     const statusClass = u.is_online ? 'status-online' : 'status-offline';
                     const statusText = u.is_online ? 'ONLINE' : 'OFFLINE';
@@ -774,7 +783,7 @@
                             </div>
                         </td>
                         <td style="font-size: 0.8rem; color: var(--accent);">${lastLogin}</td>
-                        <td style="font-size: 0.85rem; color: var(--text-dim);">${date}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-dim);">${lastLogout}</td>
                         <td>
                             <button class="btn-action" onclick="deleteUser(${u.id})">🗑️</button>
                         </td>

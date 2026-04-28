@@ -26,6 +26,7 @@ const initAndSeed = async () => {
     // 🔥 Ensure missing columns exist (Migration for existing tables)
     await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user'");
     await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP");
+    await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_logout TIMESTAMP");
     await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT FALSE");
     await db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
 

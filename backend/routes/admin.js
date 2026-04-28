@@ -79,7 +79,7 @@ router.post("/logout", async (req, res) => {
 // 🔒 3. PROTECTED ROUTES
 router.get("/users", async (req, res) => {
   try {
-    const result = await db.query("SELECT id, name, email, role, last_login, is_online, created_at FROM users ORDER BY is_online DESC, last_login DESC");
+    const result = await db.query("SELECT id, name, email, role, last_login, last_logout, is_online, created_at FROM users WHERE role = 'user' ORDER BY is_online DESC, last_login DESC");
     return res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -90,9 +90,11 @@ router.get("/users", async (req, res) => {
 // ✅ Get Stats
 router.get("/stats", async (req, res) => {
   try {
-    const result = await db.query("SELECT COUNT(*) as count FROM users");
+    const totalResult = await db.query("SELECT COUNT(*) as count FROM users WHERE role = 'user'");
+    const onlineResult = await db.query("SELECT COUNT(*) as count FROM users WHERE role = 'user' AND is_online = TRUE");
     return res.json({
-      totalUsers: parseInt(result.rows[0].count),
+      totalUsers: parseInt(totalResult.rows[0].count),
+      onlineUsers: parseInt(onlineResult.rows[0].count),
       systemIntegrity: "99.9%",
       nodeStatus: "Active"
     });

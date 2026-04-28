@@ -95,7 +95,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 // @desc    Logout user
 router.post('/logout', authMiddleware, async (req, res) => {
   try {
-    await db.query('UPDATE users SET is_online = FALSE WHERE id = $1', [req.user.id]);
+    await db.query('UPDATE users SET is_online = FALSE, last_logout = NOW() WHERE id = $1', [req.user.id]);
     res.json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error(err.message);
