@@ -29,6 +29,18 @@
             box-sizing: border-box;
         }
 
+        /* ROOT-LEVEL RESPONSIVENESS FIXES */
+        html, body {
+            max-width: 100vw;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        img, video, canvas, svg {
+            max-width: 100%;
+            height: auto;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-white);
