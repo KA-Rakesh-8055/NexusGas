@@ -1542,6 +1542,17 @@
             .menu-toggle {
                 display: flex;
             }
+            .nav { padding: 10px; }
+            .nav-actions { display: none; } /* Hide button on mobile, put inside menu or just use hero button */
+            body, html { overflow-x: hidden; max-width: 100%; width: 100%; }
+            .container { padding: 0 15px; width: 100%; max-width: 100%; }
+            img, video, canvas { max-width: 100%; height: auto; }
+            .hero-visual { display: none; } /* On very small screens, visual might overflow or distract */
+            .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+        @media (max-width: 480px) {
+            .stats-bar { grid-template-columns: 1fr; }
+            h1, h2, h3 { word-wrap: break-word; overflow-wrap: break-word; }
         }
     </style>
 </head>
