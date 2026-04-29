@@ -41,6 +41,16 @@
             height: auto;
         }
 
+        /* FIX INLINE GRIDS ON MOBILE */
+        @media (max-width: 768px) {
+            [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            [style*="display: flex"] {
+                flex-wrap: wrap !important;
+            }
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-white);

@@ -76,6 +76,16 @@
             height: auto;
         }
 
+        /* FIX INLINE GRIDS AND FLEX ON MOBILE */
+        @media (max-width: 768px) {
+            [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            [style*="display: flex"] {
+                flex-wrap: wrap !important;
+            }
+        }
+
         html,
         body {
             height: 100%
