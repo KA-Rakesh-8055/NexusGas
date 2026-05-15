@@ -2674,6 +2674,36 @@
 
         if (typeof lucide !== 'undefined') lucide.createIcons();
     </script>
+
+    <script>
+
+    async function getWeight() {
+
+        try {
+
+            const response =
+                await fetch("/get-weight");
+
+            const data =
+                await response.json();
+
+            console.log(data.weight);
+
+            // UPDATE YOUR WEIGHT DISPLAY HERE
+
+            document.getElementById("liveDailyAvg")
+                .innerText =
+                data.weight + " g";
+
+        } catch(err) {
+
+            console.log(err);
+        }
+    }
+
+    setInterval(getWeight, 1000);
+
+    </script>
 </body>
 
 </html>

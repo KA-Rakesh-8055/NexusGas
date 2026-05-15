@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #fff;
+            overflow-x: hidden;
+            scroll-behavior: smooth
+        }
+
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1)
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #0ff
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem
+        }
+
+        .nav-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: 0.3s
+        }
+
+        .nav-links a:hover {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            perspective: 1200px
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem
+        }
+
+        .hero p {
+            color: #aaa;
+            margin-bottom: 2rem
+        }
+
+        .cta {
+            padding: 0.8rem 1.5rem;
+            margin: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            background: #0ff;
+            color: #000;
+            cursor: pointer;
+            transition: 0.3s
+        }
+
+        .cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px #0ff
+        }
+
+        .hero-visual {
+            width: 300px;
+            height: 300px;
+            margin: auto;
+            transform-style: preserve-3d;
+            transition: transform 0.2s
+        }
+
+        .layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #0ff, #00f);
+            border-radius: 20px;
+            opacity: 0.7;
+            filter: blur(20px)
+        }
+
+        .layer:nth-child(2) {
+            transform: translateZ(40px)
+        }
+
+        .layer:nth-child(3) {
+            transform: translateZ(80px)
+        }
+
+        section {
+            padding: 5rem 2rem;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: 1s
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            transform-style: preserve-3d;
+            transition: 0.3s
+        }
+
+        .card:hover {
+            transform: rotateY(10deg) rotateX(10deg) translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2)
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center
+        }
+
+        .stat {
+            transform-style: preserve-3d;
+            transition: 0.3s
+        }
+
+        .stat:hover {
+            transform: translateY(-10px) scale(1.05)
+        }
+
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem
+        }
+
+        .price-card {
+            padding: 2rem;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: 0.3s
+        }
+
+        .price-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 25px #0ff
+        }
+
+        .recommended {
+            border: 2px solid #0ff
+        }
+
+        .contact input,
+        .contact textarea {
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border: none;
+            border-radius: 8px;
+            background: #111;
+            color: #fff
+        }
+
+        .contact input:focus,
+        .contact textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px #0ff
+        }
+
+        footer {
+            padding: 2rem;
+            text-align: center;
+            background: #05050a
+        }
+
+        .parallax {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none
+        }
+
+        .shape {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #0ff, transparent);
+            opacity: 0.2
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 20%
+        }
+
+        .shape:nth-child(2) {
+            top: 60%;
+            left: 70%
+        }
+
+        @media(max-width:768px) {
+            .nav-links {
+                position: absolute;
+                top: 70px;
+                right: -100%;
+                flex-direction: column;
+                background: #111;
+                padding: 2rem;
+                width: 200px;
+                transition: 0.3s
+            }
+
+            .nav-links.active {
+                right: 0
+            }
+
+            .menu-toggle {
+                display: block
+            }
+
+            .hero h1 {
+                font-size: 2rem
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">NexusX</div>
+            <div class="menu-toggle">☰</div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="parallax">
+                <div class="shape"></div>
+                <div class="shape"></div>
+            </div>
+            <div class="hero-content">
+                <h1>Future of Smart Systems</h1>
+                <p>Experience next-level 3D UI powered SaaS platform</p>
+                <button class="cta">Get Started</button>
+                <button class="cta">Learn More</button>
+                <div class="hero-visual" id="tilt">
+                    <div class="layer"></div>
+                    <div class="layer"></div>
+                    <div class="layer"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            <div class="features">
+                <div class="card">Real-time Analytics</div>
+                <div class="card">AI Automation</div>
+                <div class="card">Cloud Sync</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Stats</h2>
+            <div class="stats">
+                <div class="stat">
+                    <h3>1M+</h3>
+                    <p>Users</p>
+                </div>
+                <div class="stat">
+                    <h3>99.9%</h3>
+                    <p>Uptime</p>
+                </div>
+                <div class="stat">
+                    <h3>24/7</h3>
+                    <p>Support</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing">
+            <h2>Pricing</h2>
+            <div class="pricing">
+                <div class="price-card">Basic<br>$9</div>
+                <div class="price-card recommended">Pro<br>$29</div>
+                <div class="price-card">Enterprise<br>$99</div>
+            </div>
+        </section>
+
+        <section class="contact" id="contact">
+            <h2>Contact</h2>
+            <input type="text" placeholder="Name">
+            <input type="email" placeholder="Email">
+            <textarea placeholder="Message"></textarea>
+            <button class="cta">Send</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026 NexusX</p>
+    </footer>
+
+    <script>
+        (function () {
+            const tilt = document.getElementById('tilt')
+            document.addEventListener('mousemove', e => {
+                const x = (window.innerWidth / 2 - e.clientX) / 25
+                const y = (window.innerHeight / 2 - e.clientY) / 25
+                tilt.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`
+            })
+            const shapes = document.querySelectorAll('.shape')
+            window.addEventListener('scroll', () => {
+                let scroll = window.scrollY
+                shapes.forEach((s, i) => {
+                    let speed = (i + 1) * 0.2
+                    s.style.transform = `translateY(${scroll * speed}px)`
+                })
+            })
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) { entry.target.classList.add('visible') }
+                })
+            }, { threshold: 0.2 })
+            document.querySelectorAll('section').forEach(sec => observer.observe(sec))
+            const toggle = document.querySelector('.menu-toggle')
+            const navLinks = document.querySelector('.nav-links')
+            toggle.onclick = () => navLinks.classList.toggle('active')
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.onclick = () => navLinks.classList.remove('active')
+            })
+        })();
+    </script>
+
+</body>
+
+</html>

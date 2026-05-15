@@ -57,6 +57,26 @@ app.use((err, req, res, next) => {
   });
 });
 
+let latestWeight = 0;
+
+// ESP32 sends weight here
+app.post("/update-weight", (req, res) => {
+
+    latestWeight = req.body.weight;
+
+    console.log("Weight:", latestWeight);
+
+    res.sendStatus(200);
+});
+
+// Frontend gets weight here
+app.get("/get-weight", (req, res) => {
+
+    res.json({
+        weight: latestWeight
+    });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
