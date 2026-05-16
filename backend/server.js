@@ -43,6 +43,25 @@ app.get('/admin', (req, res) => {
 app.use('/admin', express.static(path.join(__dirname, '../Admin')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+let latestWeight = 0;
+let lastUpdate = Date.now();
+
+// ESP32 sends weight here
+app.post("/update-weight", (req, res) => {
+    latestWeight = req.body.weight;
+    lastUpdate = Date.now();
+    console.log("Weight:", latestWeight);
+    res.sendStatus(200);
+});
+
+// Frontend gets weight here
+app.get("/get-weight", (req, res) => {
+    res.json({
+        weight: latestWeight,
+        lastUpdate: lastUpdate
+    });
+});
+
 // ✅ LAST LINE (Global 404)
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.path}` });
@@ -57,28 +76,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-let latestWeight = 0;
-let lastUpdate = Date.now();
-
-// ESP32 sends weight here
-app.post("/update-weight", (req, res) => {
-
-    latestWeight = req.body.weight;
-    lastUpdate = Date.now();
-
-    console.log("Weight:", latestWeight);
-
-    res.sendStatus(200);
-});
-
-// Frontend gets weight here
-app.get("/get-weight", (req, res) => {
-
-    res.json({
-        weight: latestWeight,
-        lastUpdate: lastUpdate
-    });
-});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
