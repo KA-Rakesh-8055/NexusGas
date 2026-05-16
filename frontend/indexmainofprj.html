@@ -2545,15 +2545,7 @@
         // Initialize UI
         updateAuthUI();
 
-        setInterval(() => {
-            const v = (70 + Math.random() * 10).toFixed(1);
-            const bar = document.getElementById('gasBar');
-            const text = document.getElementById('gasText');
-            if (bar && text) {
-                bar.style.width = v + '%';
-                text.innerText = v + '%';
-            }
-        }, 3000);
+        // Removed fake data generation
         // UPI Scanner Logic
         let currentUPIMethod = '';
         function openUPIModal(method) {
@@ -2602,50 +2594,24 @@
 
         function startIoTProtocol() {
             if (syncInterval) clearInterval(syncInterval);
-            document.getElementById('connectedNodeIP').innerText = esp32_IP;
-            
-            syncInterval = setInterval(async () => {
-                if (!esp32_IP) return;
-                
-                try {
-                    // Handshake with physical ESP32
-                    const response = await fetch(`http://${esp32_IP}/data`, { mode: 'cors' });
-                    const data = await response.json();
-                    
-                    /* 
-                       ESP32 Expected JSON Template:
-                       { "gas": 45, "volt": 230.2, "load": 4.5 }
-                    */
-                    
-                    updateDashboardTelemetry(data);
-                    
-                } catch (err) {
-                    // Fallback to simulation if hardware is not yet connected
-                    console.warn("Hardware Not Found - Entering Simulation Mode");
-                    const mockData = {
-                        gas: Math.floor(Math.random() * 100),
-                        volt: (220 + Math.random() * 20).toFixed(1),
-                        load: (3.5 + Math.random() * 2).toFixed(2)
-                    };
-                    updateDashboardTelemetry(mockData);
-                }
-            }, 2000);
+            document.getElementById('connectedNodeIP').innerText = "Backend API";
+            // Data syncing is now handled by getWeight() polling every 100ms
         }
 
         function updateDashboardTelemetry(data) {
             // Update Circular Gauge
             const gauge = document.querySelector('.gauge-fill');
             const gasText = document.getElementById('liveGasValue');
-            if (gauge && gasText) {
+            if (gauge && gasText && data.gas !== undefined) {
                 const offset = 440 - (440 * (data.gas / 100));
                 gauge.style.strokeDashoffset = offset;
                 gasText.innerText = data.gas + '%';
             }
 
             // Update Telemetry Cards
-            document.getElementById('liveVoltage').innerText = data.volt + ' V';
-            document.getElementById('liveLoad').innerText = data.load + ' kW';
-            document.getElementById('liveDailyAvg').innerText = (data.gas / 25).toFixed(2) + ' kg';
+            if (data.volt !== undefined) document.getElementById('liveVoltage').innerText = data.volt + ' V';
+            if (data.load !== undefined) document.getElementById('liveLoad').innerText = data.load + ' kW';
+            if (data.weight !== undefined) document.getElementById('liveDailyAvg').innerText = data.weight + ' g';
 
             // Visual Handshake Confirmation
             const badge = document.getElementById('systemStatusBadge');
@@ -2676,32 +2642,47 @@
     </script>
 
     <script>
+    let lastValidWeight = null;
+    const MAX_WEIGHT_G = 30000; // Example 30kg max
 
     async function getWeight() {
-
         try {
+            const response = await fetch("/get-weight");
+            const data = await response.json();
 
-            const response =
-                await fetch("/get-weight");
+            // Freeze if ESP32 stopped sending data for > 5 seconds
+            if (Date.now() - data.lastUpdate > 5000) {
+                setNodeOffline();
+                return;
+            }
 
-            const data =
-                await response.json();
+            let currentWeight = parseFloat(data.weight);
 
-            console.log(data.weight);
+            // Ignore invalid values
+            if (isNaN(currentWeight) || currentWeight < 0) return;
 
-            // UPDATE YOUR WEIGHT DISPLAY HERE
+            // Ignore huge sudden jumps (noise filter, > 5000g jump)
+            if (lastValidWeight !== null && Math.abs(currentWeight - lastValidWeight) > 5000) {
+                return;
+            }
 
-            document.getElementById("liveDailyAvg")
-                .innerText =
-                data.weight + " g";
+            lastValidWeight = currentWeight;
+
+            // Map weight to 0-100% for the gas gauge
+            let gasPercent = Math.max(0, Math.min(100, (currentWeight / MAX_WEIGHT_G) * 100)).toFixed(1);
+
+            updateDashboardTelemetry({
+                gas: gasPercent,
+                weight: currentWeight.toFixed(0) // Used for liveDailyAvg text
+            });
 
         } catch(err) {
-
             console.log(err);
         }
     }
 
-    setInterval(getWeight, 1000);
+    // Very fast ~100ms refresh
+    setInterval(getWeight, 100);
 
     </script>
 </body>

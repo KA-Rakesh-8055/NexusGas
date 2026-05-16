@@ -58,11 +58,13 @@ app.use((err, req, res, next) => {
 });
 
 let latestWeight = 0;
+let lastUpdate = Date.now();
 
 // ESP32 sends weight here
 app.post("/update-weight", (req, res) => {
 
     latestWeight = req.body.weight;
+    lastUpdate = Date.now();
 
     console.log("Weight:", latestWeight);
 
@@ -73,7 +75,8 @@ app.post("/update-weight", (req, res) => {
 app.get("/get-weight", (req, res) => {
 
     res.json({
-        weight: latestWeight
+        weight: latestWeight,
+        lastUpdate: lastUpdate
     });
 });
 
